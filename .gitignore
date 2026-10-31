@@ -1,0 +1,5 @@
+/dist/
+/netkit
+*.pcap
+*.pcapng
+coverage.out
