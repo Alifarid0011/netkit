@@ -85,6 +85,27 @@ func FirewallList(ctx context.Context) (string, error) {
 	return out.text.String(), nil
 }
 
+func nftRun(ctx context.Context, input string, args ...string) (string, error) {
+	bounded, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(bounded, "nft", args...)
+	cmd.Stdin = strings.NewReader(input)
+	out := &cappedOutput{limit: 4 << 20}
+	diag := &cappedOutput{limit: 4096}
+	cmd.Stdout = out
+	cmd.Stderr = diag
+	if err := cmd.Run(); err != nil {
+		if bounded.Err() != nil {
+			return "", bounded.Err()
+		}
+		return "", fmt.Errorf("nft (requires CAP_NET_ADMIN): %w: %s", err, strings.TrimSpace(diag.text.String()))
+	}
+	if out.truncated {
+		return "", errors.New("nft output exceeds 4 MiB limit")
+	}
+	return out.text.String(), nil
+}
+
 type cappedOutput struct {
 	text      strings.Builder
 	limit     int
