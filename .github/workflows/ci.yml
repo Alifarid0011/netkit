@@ -1,0 +1,29 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.x'
+          cache: false
+      - run: sudo apt-get update && sudo apt-get install -y tcpdump nftables iproute2
+      - run: test -z "$(gofmt -l cmd internal)"
+      - run: go vet ./...
+      - name: Verify isolated firewall integration
+        run: |
+          go test -c -o "$RUNNER_TEMP/netkit-linux.test" ./internal/linux
+          sudo env NETKIT_TEST_NFT=1 "$RUNNER_TEMP/netkit-linux.test" -test.run '^TestFirewallIsolation$' -test.v
+      - run: go test -race -cover ./...
+      - run: bash packaging/build.sh ci
+      - name: Smoke-test installation
+        run: |
+          ./dist/netkit_ci_linux_amd64/install.sh --prefix "$RUNNER_TEMP/netkit-install"
+          "$RUNNER_TEMP/netkit-install/bin/netkit" version
+          "$RUNNER_TEMP/netkit-install/bin/netkit" help
