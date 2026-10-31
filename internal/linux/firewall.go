@@ -11,10 +11,6 @@ import (
 	"time"
 )
 
-// ErrMutationUnsupported is retained for callers of earlier plan-only builds.
-// Managed mutation is now verified by opt-in isolated namespace tests.
-var ErrMutationUnsupported = errors.New("firewall mutation is unavailable: isolated namespace integration has not been verified; use firewall plan and apply reviewed operations independently")
-
 type Rule struct {
 	Action   string `json:"action"`
 	Protocol string `json:"protocol"`
@@ -85,34 +81,6 @@ func FirewallList(ctx context.Context) (string, error) {
 	}
 	if out.truncated {
 		return "", errors.New("nft ruleset exceeds 4 MiB output limit")
-	}
-	return out.text.String(), nil
-}
-
-func FirewallApply(ctx context.Context, rule Rule) error {
-	_, err := ManagedApply(ctx, rule)
-	return err
-}
-
-func FirewallRemove(ctx context.Context, id string) error { return ManagedRemove(ctx, id) }
-
-func nftRun(ctx context.Context, input string, args ...string) (string, error) {
-	bounded, cancel := context.WithTimeout(ctx, 10*time.Second)
-	defer cancel()
-	cmd := exec.CommandContext(bounded, "nft", args...)
-	cmd.Stdin = strings.NewReader(input)
-	out := &cappedOutput{limit: 4 << 20}
-	diag := &cappedOutput{limit: 4096}
-	cmd.Stdout = out
-	cmd.Stderr = diag
-	if err := cmd.Run(); err != nil {
-		if bounded.Err() != nil {
-			return "", bounded.Err()
-		}
-		return "", fmt.Errorf("nft (requires CAP_NET_ADMIN): %w: %s", err, strings.TrimSpace(diag.text.String()))
-	}
-	if out.truncated {
-		return "", errors.New("nft output exceeds 4 MiB limit")
 	}
 	return out.text.String(), nil
 }

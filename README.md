@@ -105,7 +105,7 @@ sudo "$(command -v netkit)" firewall apply --action block --protocol tcp --port 
 sudo "$(command -v netkit)" firewall remove --id 'netkit-v1-RETURNED_ID' --confirm
 ```
 
-`apply` requires explicit `--confirm`. Temporary mode is the default; `--duration` accepts 1 second to 10 minutes. Its cleanup runs only while the foreground process is alive: a crash, SIGKILL or machine shutdown can prevent automatic removal. `--keep` deliberately disables that cleanup. A firewall change may sever an SSH connection: use local access or a recovery path, and test plans in a lab first. Netkit does not elevate itself.
+`apply` requires explicit `--confirm`. Temporary mode is the default; `--duration` accepts 1 second to 10 minutes. Ctrl+C, SIGTERM and terminal hangup request cleanup. Its cleanup runs only while the foreground process is alive: a crash, SIGKILL or machine shutdown can prevent automatic removal. `--keep` deliberately disables that cleanup. A firewall change may sever an SSH connection: use local access or a recovery path, and test plans in a lab first. Netkit does not elevate itself.
 
 Rules use random ownership IDs and are removed by their current kernel handle. The table and chain must carry Netkit's exact ownership comments and expected configuration; foreign tables are refused. Batches apply atomically and never flush unrelated rules or change global policies. Removing the last rule leaves the empty managed table/chain in place. Coordinate other firewall managers: ownership checking and mutation are not a persisted compare-and-swap transaction. If mutation succeeds but later handle lookup fails, the error includes the rule ID for inspection/removal.
 
