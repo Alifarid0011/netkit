@@ -99,10 +99,10 @@ Plans contain static nftables batch statements for a dedicated `inet netkit` tab
 # First preview the intended rule:
 netkit firewall plan --action block --protocol tcp --port 8080 --explain
 # Apply in the CURRENT namespace, removing after 30 seconds or Ctrl+C:
-sudo netkit firewall apply --action block --protocol tcp --port 8080 --confirm
+sudo "$(command -v netkit)" firewall apply --action block --protocol tcp --port 8080 --confirm
 # Explicitly persist it instead; keep the returned ownership ID:
-sudo netkit firewall apply --action block --protocol tcp --port 8080 --confirm --keep
-sudo netkit firewall remove --id 'netkit-v1-RETURNED_ID' --confirm
+sudo "$(command -v netkit)" firewall apply --action block --protocol tcp --port 8080 --confirm --keep
+sudo "$(command -v netkit)" firewall remove --id 'netkit-v1-RETURNED_ID' --confirm
 ```
 
 `apply` requires explicit `--confirm`. Temporary mode is the default; `--duration` accepts 1 second to 10 minutes. Its cleanup runs only while the foreground process is alive: a crash, SIGKILL or machine shutdown can prevent automatic removal. `--keep` deliberately disables that cleanup. A firewall change may sever an SSH connection: use local access or a recovery path, and test plans in a lab first. Netkit does not elevate itself.
