@@ -18,7 +18,8 @@
 - [ ] RouterOS/CHR lab matrix, version/capability discovery and management-disconnect recovery
 - [ ] RouterOS NAT/address/route plans and writes after lab validation
 - [ ] Bounded RouterOS sniffer/TZSP reception with session ownership and cleanup
-- [ ] Richer live charts, discoverable action menus and terminal resizing
+- [x] Keyboard action menu, editable forms, scrolling results, resize handling and mutation confirmations
+- [ ] Richer live charts and concurrent operation management
 - [ ] Persistent device profiles with credential-provider integration
 - [ ] RPM/DEB packaging and package-manager distribution
 

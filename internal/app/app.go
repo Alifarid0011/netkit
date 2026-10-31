@@ -37,7 +37,7 @@ Observe, understand, then change.
   netkit firewall list|plan|apply|remove [flags]  Managed nftables rules
   netkit router list|add|remove [flags]   MikroTik RouterOS 7 HTTPS REST
   netkit tor start|check [flags]         Dedicated Tor / SOCKS-routed IP check
-  netkit tui                            Live dashboard (q + Enter to quit)
+  netkit tui                            Keyboard workbench (F1 for help)
   netkit version
 
   --explain  Explain method and limits.  --json  Versioned machine output.
@@ -117,6 +117,12 @@ func Run(ctx context.Context, args []string, out, diagnostics io.Writer) int {
 		}
 	}
 	args = filtered
+	if len(args) == 0 && !o.json && !o.explain && dashboardTerminal(out) {
+		if err := dashboard(ctx, out, diagnostics); err != nil {
+			return o.fail(err, 1)
+		}
+		return 0
+	}
 	if len(args) == 0 || args[0] == "help" || args[0] == "--help" || args[0] == "-h" {
 		fmt.Fprint(out, help)
 		return 0

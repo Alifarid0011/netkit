@@ -124,6 +124,11 @@ func firewall(ctx context.Context, args []string, o output) int {
 }
 
 func router(ctx context.Context, args []string, o output) int {
+	return routerWithPassword(ctx, args, o, nil)
+}
+
+// An explicit session secret avoids process-global environment changes in the TUI.
+func routerWithPassword(ctx context.Context, args []string, o output, secret *string) int {
 	if len(args) == 0 {
 		return o.fail(errors.New("router requires list, add or remove"), 2)
 	}
@@ -177,6 +182,9 @@ func router(ctx context.Context, args []string, o output) int {
 		return 0
 	}
 	password := os.Getenv("NETKIT_ROUTER_PASSWORD")
+	if secret != nil {
+		password = *secret
+	}
 	if *passwordStdin {
 		var err error
 		password, err = readPassword(ctx, os.Stdin)

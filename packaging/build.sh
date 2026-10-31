@@ -8,7 +8,7 @@ for arch in amd64 arm64; do
   stage="dist/netkit_${version}_linux_${arch}"
   mkdir -p "$stage"
   CGO_ENABLED=0 GOOS=linux GOARCH="$arch" go build -trimpath -ldflags "-s -w -X github.com/Alifarid0011/netkit/internal/app.Version=$version" -o "$stage/netkit" ./cmd/netkit
-  cp README.md LICENSE CHANGELOG.md ROADMAP.md "$stage/"
+  cp README.md LICENSE THIRD_PARTY_NOTICES CHANGELOG.md ROADMAP.md "$stage/"
   cp packaging/install.sh "$stage/install.sh"
   chmod 755 "$stage/install.sh"
   tar -C dist -czf "${stage}.tar.gz" "$(basename "$stage")"

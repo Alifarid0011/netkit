@@ -32,7 +32,7 @@ netkit version
 Ensure `$HOME/.local/bin` is on PATH. Existing binaries are preserved unless `--force` is passed. To remove the user-local installation: `rm "$HOME/.local/bin/netkit"`. The installer installs only the binary, not a service or system networking configuration. Go source installation:
 
 ```sh
-go install github.com/Alifarid0011/netkit/cmd/netkit@v0.1.0
+go install github.com/Alifarid0011/netkit/cmd/netkit@v0.2.0
 ```
 
 Requires Go 1.24+ for source builds; release binaries do not need Go or CGO. Linux amd64 and arm64 archives are provided. Backends are optional by feature:
@@ -62,7 +62,27 @@ netkit ping --count 4 example.com
 netkit tui
 ```
 
-The dashboard refreshes every three seconds. Type `i`, `p`, `h`, or `q` followed by Enter for interfaces, listeners, explanations, or quit. Ctrl+C also exits. It is read-only and observes the current process's network namespace. It needs an interactive ANSI terminal; scriptable commands work without one.
+Run `netkit` in an interactive terminal to open the workbench, or use `netkit tui` explicitly. No extra Enter is needed for navigation. The menu exposes all existing tools with editable forms, in-session results and live bounded output. Network operations run in the background; navigating and scrolling stay responsive.
+
+| Key | Action |
+|---|---|
+| ↑ / ↓, or j / k in the menu | Select a tool |
+| Enter | Open a form, advance a field, or activate Run |
+| Tab / Shift+Tab | Move between menu, form and results |
+| ↑ / ↓ in a form | Select a field or the Run button |
+| ← / →, Home / End | Edit text at the cursor |
+| Ctrl+U | Delete text before the cursor |
+| Ctrl+R | Run the current form |
+| PgUp / PgDn | Scroll results from any pane |
+| g / G in results | Go to top / follow output |
+| Esc | Stop the active task, otherwise return to the menu |
+| Ctrl+C | Stop the active task; quit when idle |
+| Ctrl+Q | Quit after waiting for active task cleanup |
+| F1, or ? outside a text field | Tool explanation and keyboard help |
+
+The highlighted border marks the focused pane. Values, results and scroll position are retained per tool for this session. Long inputs scroll horizontally; forms, results and mutation reviews scroll within the terminal. Minimum supported size is 70×18. Passwords are masked and never saved or put in command previews. No elevation happens automatically.
+
+Firewall apply/remove and RouterOS writes require a separate **y/N confirmation**. The dashboard only offers temporary Linux rule creation with timed cleanup; permanent `--keep` remains a deliberate CLI operation. It can read RouterOS, create disabled filters and remove owned filters using the same experimental backend described below. One operation runs at a time; stop a long-running proxy or Tor client before starting another task. Scriptable commands remain available without a terminal.
 
 `doctor` checks up to 16 resolved addresses individually, validates TLS certificates, does not follow HTTP redirects, and reports HTTP status. A host with one working address and one failed address returns failure to keep partial reachability visible. TCP probes measure connection setup, not bandwidth or ICMP latency. Local listeners are not necessarily reachable from another machine. Process attribution may be unavailable without permission.
 
@@ -177,6 +197,6 @@ go build ./cmd/netkit
 bash packaging/build.sh v0.1.0
 ```
 
-Tests cover local HTTP/TLS failures and redirects, TCP cancellation, typed backend arguments, PCAP fixtures, capture flushing, RouterOS authentication/ownership, SOCKS remote DNS, and proxy streaming. Namespace integration is opt-in locally (`NETKIT_TEST_NFT=1 go test -race ./internal/linux`) and runs in a dedicated isolated namespace in CI. A namespace guard prevents the helper from touching its parent network namespace. See [CONTRIBUTING.md](CONTRIBUTING.md) and [ROADMAP.md](ROADMAP.md).
+Tests cover local HTTP/TLS failures and redirects, TCP cancellation, typed backend arguments, PCAP fixtures, capture flushing, RouterOS authentication/ownership, SOCKS remote DNS, and proxy streaming. Namespace integration is opt-in locally (`NETKIT_TEST_NFT=1 go test -race ./internal/linux`) and runs in a dedicated isolated namespace in CI. A namespace guard prevents the helper from touching its parent network namespace. The terminal UI uses Bubble Tea, Bubbles and Lip Gloss. Binary archives include [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES). See [CONTRIBUTING.md](CONTRIBUTING.md) and [ROADMAP.md](ROADMAP.md).
 
 Created by **Ali Farid** · [GitHub](https://github.com/Alifarid0011) · MIT license.
