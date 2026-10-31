@@ -19,7 +19,11 @@ jobs:
       - name: Verify isolated firewall integration
         run: |
           go test -c -o "$RUNNER_TEMP/netkit-linux.test" ./internal/linux
-          sudo env NETKIT_TEST_NFT=1 "$RUNNER_TEMP/netkit-linux.test" -test.run '^TestFirewallIsolation$' -test.v
+          # User-namespace root cannot traverse runner-owned private temp directories.
+          sandbox_dir=$(sudo mktemp -d /tmp/netkit-test.XXXXXX)
+          trap 'sudo rm -f "$sandbox_dir/netkit-linux.test"; sudo rmdir "$sandbox_dir"' EXIT
+          sudo install -m 755 "$RUNNER_TEMP/netkit-linux.test" "$sandbox_dir/netkit-linux.test"
+          sudo env NETKIT_TEST_NFT=1 "$sandbox_dir/netkit-linux.test" -test.run '^TestFirewallIsolation$' -test.v
       - run: go test -race -cover ./...
       - run: bash packaging/build.sh ci
       - name: Smoke-test installation
